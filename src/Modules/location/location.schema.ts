@@ -2,6 +2,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 export type LocationDocument = Location & Document;
+
 @Schema({ _id: false })
 class Geometry {
   @Prop({ required: true, enum: ['Point', 'Polygon', 'MultiPolygon', 'LineString'] })
@@ -9,6 +10,30 @@ class Geometry {
 
   @Prop({ type: [Object], required: true })
   coordinates: any;
+}
+
+@Schema({ _id: false })
+class Address {
+  @Prop()
+  country: string;
+
+  @Prop()
+  housenumber: string;
+
+  @Prop()
+  postcode: string;
+
+  @Prop()
+  street: string;
+
+  @Prop()
+  city: string;
+
+  @Prop()
+  suburb?: string;
+
+  @Prop()
+  housename?: string;
 }
 
 @Schema()
@@ -21,6 +46,9 @@ export class Location extends Document {
 
   @Prop({ type: Object, required: true })
   properties: Record<string, any>;
+
+  @Prop({ type: Address })
+  address: Address;
 }
 
 export const LocationSchema = SchemaFactory.createForClass(Location);

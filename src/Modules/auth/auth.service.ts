@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/CreateUser.dto';
 import { LoginUserDto } from '../users/dto/LoginUserDto';
+import { UserDocument } from '../users/users.schema';
 
 
 @Injectable()
@@ -18,7 +19,7 @@ export class AuthService {
     const { email, password } = loginUserDto
     const user = await this.usersService.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user.toObject();
+      const { password, ...result } = (user as UserDocument).toObject();
       return result;
     }
     return null;
@@ -36,7 +37,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
       const newUser = await this.usersService.create({ ...createUserDto, password: hashedPassword });
-      const { password: _, ...result } = newUser;
+      const { password: _, ...result } = (newUser as UserDocument).toObject();
       return result;
     } catch (error) {
       console.log('server error', error.errorResponse)

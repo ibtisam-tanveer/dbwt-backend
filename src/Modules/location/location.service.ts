@@ -39,7 +39,7 @@ export class LocationService {
 
   // async findByQuery(query: any): Promise<Location[]> {
   //   const mongoQuery: any = {};
-  
+
   //   for (const [key, value] of Object.entries(query)) {
   //     // If the key matches any address field, prefix with 'address.'
   //     if (["country", "housenumber", "postcode", "street", "city", "housename"].includes(key)) {
@@ -48,20 +48,20 @@ export class LocationService {
   //       mongoQuery[key] = value; // direct field like amenity, name, etc.
   //     }
   //   }
-  
+
   //   return this.locationModel.find(mongoQuery).exec();
   // }
-  
- 
+
+
   async findByQuery(query: any): Promise<LocationDocument[]> {
     const mongoQuery: FilterQuery<LocationDocument> = {};
-  
+
     const addressFields = ['country', 'housenumber', 'postcode', 'street', 'city', 'housename'];
     const topLevelFields = ['type']; // Add others if needed
-  
+
     for (const [key, value] of Object.entries(query)) {
       const regex = new RegExp(value as string, 'i'); // case-insensitive
-  
+
       if (topLevelFields.includes(key)) {
         mongoQuery[key] = regex;
       } else if (addressFields.includes(key)) {
@@ -70,8 +70,8 @@ export class LocationService {
         mongoQuery[`properties.${key}`] = regex;
       }
     }
-  
+
     return this.locationModel.find(mongoQuery).exec();
   }
-  
+
 }

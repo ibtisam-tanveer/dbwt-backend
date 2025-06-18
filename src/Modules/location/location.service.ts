@@ -19,6 +19,26 @@ export class LocationService {
     return this.locationModel.findById(id);
   }
 
+  async findNearby(latitude: number, longitude: number, distance: number = 1000): Promise<LocationDocument[]> {
+    // Convert distance from meters to degrees (approximate)
+    // 1 degree ≈ 111,000 meters at the equator
+    const distanceInDegrees = distance / 111000;
+
+    const query = {
+      'geometry.coordinates': {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude] // MongoDB uses [lng, lat] order
+          },
+          $maxDistance: distance
+        }
+      }
+    };
+
+    return this.locationModel.find(query).exec();
+  }
+
   // async findByQuery(query: any) {
   //   const mongoQuery: FilterQuery<LocationDocument> = {};
 

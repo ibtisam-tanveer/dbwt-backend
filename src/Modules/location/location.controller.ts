@@ -3,6 +3,7 @@ import { LocationService } from './location.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { FindNearbyDto } from './dto/FindNearbyDto';
 
 @Controller('location')
 // @UseGuards(JwtAuthGuard, RolesGuard)
@@ -18,6 +19,12 @@ export class LocationController {
       return this.locationService.findByQuery(query);
     }
     // return this.locationService.findAll();
+  }
+
+  @Get('nearby')
+  async findNearby(@Query() query: FindNearbyDto) {
+    const { latitude, longitude, distance } = query;
+    return this.locationService.findNearby(latitude, longitude, distance);
   }
 
   @Get(':id')

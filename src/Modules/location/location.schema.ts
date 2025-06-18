@@ -52,3 +52,6 @@ export class Location extends Document {
 }
 
 export const LocationSchema = SchemaFactory.createForClass(Location);
+
+// Add geospatial index for efficient nearby location queries
+LocationSchema.index({ 'geometry.coordinates': '2dsphere' });

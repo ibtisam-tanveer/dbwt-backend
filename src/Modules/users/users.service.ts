@@ -49,16 +49,60 @@ export class UsersService {
         return user;
     }
 
-    async getFavorites(userId: string): Promise<User> {
+    async toggleFavorite(userId: string, locationId: string): Promise<User> {
+        const user = await this.userModel.findById(userId).exec();
+      
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
+      
+        const locationObjectId = new Types.ObjectId(locationId);
+        const isFavorite = user.favorites.some((favId) =>
+          favId.equals(locationObjectId)
+        );
+      
+        const update = isFavorite
+          ? { $pull: { favorites: locationObjectId } }
+          : { $addToSet: { favorites: locationObjectId } };
+      
+        const updatedUser = await this.userModel.findByIdAndUpdate(
+          userId,
+          update,
+          { new: true }
+        ).exec();
+      
+        if (!updatedUser) {
+          throw new NotFoundException('User not found during update');
+        }
+      
+        return updatedUser;
+      }
+      
+
+
+    async getFavorites(userId: string): Promise<any[]> {
         const user = await this.userModel.findById(userId)
-        // console.log(user?.favorites)
             .populate('favorites')
-             .exec();
+            .exec();
 
         if (!user) {
             throw new NotFoundException('User not found');
         }
 
-        return user;
+        return user.favorites;
     }
+
+    // async getFavorites(userId: string): Promise<User> {
+    //     const user = await this.userModel.findById(userId)
+    //         // console.log(user?.favorites)
+    //         .populate('favorites')
+    //         .exec();
+
+    //     if (!user) {
+    //         throw new NotFoundException('User not found');
+    //     }
+    //     const fav = user.favorites
+
+    //     return fav;
+    // }
 }

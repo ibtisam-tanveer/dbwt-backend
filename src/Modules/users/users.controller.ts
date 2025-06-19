@@ -15,6 +15,13 @@ export class UsersController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Post('toggle/favorites')
+    @HttpCode(200)
+    async toggleFavourites(@Request() req, @Body() manageFavoriteDto: ManageFavoriteDto) {
+        return this.usersService.toggleFavorite(req.user.userId, manageFavoriteDto.locationId);
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Delete('favorites')
     @HttpCode(200)
     async removeFavorite(@Request() req, @Body() manageFavoriteDto: ManageFavoriteDto) {

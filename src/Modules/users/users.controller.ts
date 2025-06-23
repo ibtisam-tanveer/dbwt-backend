@@ -1,11 +1,31 @@
-import { Controller, Post, Delete, Get, Body, UseGuards, Request, HttpCode } from '@nestjs/common';
+import { Controller, Post, Delete, Get, Put, Body, UseGuards, Request, HttpCode, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ManageFavoriteDto } from './dto/ManageFavoriteDto';
+import { UpdateUserDto } from './dto/UpdateUserDto';
+import { UserResponseDto } from './dto/UserResponseDto';
+import { LocationDto } from './dto/LocationDto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { plainToClass } from 'class-transformer';
 
 @Controller('users')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
+
+    @UseGuards(JwtAuthGuard)
+    @Get('profile')
+    async getUserProfile(@Request() req): Promise<UserResponseDto> {
+        const user = await this.usersService.findByUserId(req.user.userId);
+        return plainToClass(UserResponseDto, user);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('profile')
+    @HttpCode(200)
+    async updateUserProfile(@Request() req, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+        const user = await this.usersService.updateUser(req.user.userId, updateUserDto);
+        return plainToClass(UserResponseDto, user);
+    }
 
     @UseGuards(JwtAuthGuard)
     @Post('favorites')
@@ -31,6 +51,7 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Get('favorites')
     async getFavorites(@Request() req) {
-        return this.usersService.getFavorites(req.user.userId);
+        const favorites = await this.usersService.getFavorites(req.user.userId);
+        return favorites.map(favorite => plainToClass(LocationDto, favorite));
     }
 }

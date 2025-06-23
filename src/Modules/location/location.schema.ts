@@ -37,7 +37,7 @@ class Address {
 }
 
 @Schema()
-export class Location extends Document {
+export class Location {
   @Prop({ required: true, enum: ['Feature'] })
   type: string;
 

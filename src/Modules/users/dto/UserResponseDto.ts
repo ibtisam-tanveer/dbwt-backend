@@ -16,6 +16,13 @@ export class UserResponseDto {
     @Expose()
     favorites: any[];
 
+    @Expose()
+    currentLocation?: {
+        latitude: number;
+        longitude: number;
+        updatedAt: Date;
+    };
+
     @Exclude()
     password: string;
 } 

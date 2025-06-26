@@ -1,14 +1,12 @@
-import { Controller, Post, Delete, Get, Put, Body, UseGuards, Request, HttpCode, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
+import { Controller, Post, Delete, Get, Put, Body, UseGuards, Request, HttpCode, Query, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ManageFavoriteDto } from './dto/ManageFavoriteDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
+import { UpdateCurrentLocationDto } from './dto/UpdateCurrentLocationDto';
 import { UserResponseDto } from './dto/UserResponseDto';
-import { LocationDto } from './dto/LocationDto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { plainToClass } from 'class-transformer';
 
 @Controller('users')
-@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
@@ -16,7 +14,10 @@ export class UsersController {
     @Get('profile')
     async getUserProfile(@Request() req): Promise<UserResponseDto> {
         const user = await this.usersService.findByUserId(req.user.userId);
-        return plainToClass(UserResponseDto, user);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        return user as UserResponseDto;
     }
 
     @UseGuards(JwtAuthGuard)
@@ -24,7 +25,7 @@ export class UsersController {
     @HttpCode(200)
     async updateUserProfile(@Request() req, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
         const user = await this.usersService.updateUser(req.user.userId, updateUserDto);
-        return plainToClass(UserResponseDto, user);
+        return user as UserResponseDto;
     }
 
     @UseGuards(JwtAuthGuard)
@@ -52,6 +53,33 @@ export class UsersController {
     @Get('favorites')
     async getFavorites(@Request() req) {
         const favorites = await this.usersService.getFavorites(req.user.userId);
-        return favorites.map(favorite => plainToClass(LocationDto, favorite));
+        return favorites;
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('current-location')
+    @HttpCode(200)
+    async updateCurrentLocation(@Request() req, @Body() updateLocationDto: UpdateCurrentLocationDto) {
+        return this.usersService.updateCurrentLocation(req.user.userId, updateLocationDto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('current-location')
+    async getCurrentLocation(@Request() req) {
+        return this.usersService.getCurrentLocation(req.user.userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('nearby')
+    async getNearbyUsers(@Request() req, @Query('distance') distance?: string) {
+        const distanceInMeters = distance ? parseInt(distance) : 1000; // Default 1km
+        const nearbyUsers = await this.usersService.findNearbyUsers(req.user.userId, distanceInMeters);
+        
+        // Return only necessary user information (exclude sensitive data)
+        return nearbyUsers.map((user: any) => ({
+            _id: user._id.toString(),
+            fullName: user.fullName,
+            currentLocation: user.currentLocation
+        }));
     }
 }

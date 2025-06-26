@@ -25,18 +25,33 @@ Set these environment variables in your Render dashboard:
 ### Build Configuration
 
 The application is configured to:
-- Build with: `npm install && npm run build`
+- Build with: `npm install && npm run prebuild && npm run build`
 - Start with: `npm start`
 - Output compiled files to: `dist/` directory
+- Verify build output before starting
+
+### Build Process
+
+The build process includes:
+1. **prebuild**: Cleans the dist directory
+2. **build**: Runs NestJS build
+3. **postbuild**: Verifies that `dist/main.js` exists
 
 ### Troubleshooting
 
-If you encounter the "Cannot find module '/opt/render/project/src/dist/main'" error:
+If you encounter the "Cannot find module '/opt/render/project/src/dist/main.js'" error:
 
-1. Check that all dependencies are properly installed
-2. Verify the build process completes successfully
-3. Ensure the `dist/` directory contains the compiled files
-4. Check that the start script points to the correct file (`dist/main.js`)
+1. **Check Build Logs**: Look for the postbuild output showing the contents of the dist directory
+2. **Verify Dependencies**: Ensure all runtime dependencies are in the `dependencies` section (not `devDependencies`)
+3. **Check TypeScript Configuration**: Ensure `tsconfig.json` has proper `outDir` and `include` settings
+4. **Verify NestJS Configuration**: Check that `nest-cli.json` is properly configured
+
+### Build Verification
+
+The build process now includes verification steps:
+- `postbuild` script checks if `dist/main.js` exists
+- `start` script verifies the file exists before attempting to run
+- Build will fail if the main.js file is not generated
 
 ### Local Testing
 
@@ -48,4 +63,10 @@ npm run build
 npm start
 ```
 
-The application should start on `http://localhost:3000` (or the PORT environment variable). 
+The application should start on `http://localhost:3000` (or the PORT environment variable).
+
+### Common Issues
+
+1. **Missing Runtime Dependencies**: Ensure `@nestjs/jwt`, `@nestjs/mongoose`, `@nestjs/passport`, `bcryptjs`, `mongoose`, `passport`, `passport-jwt`, `passport-local` are in `dependencies`
+2. **TypeScript Compilation Errors**: Check for syntax errors in TypeScript files
+3. **Build Directory Issues**: Ensure the `dist/` directory is properly cleaned and recreated 

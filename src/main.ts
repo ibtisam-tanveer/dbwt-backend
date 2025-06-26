@@ -29,6 +29,5 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
 }
+
 bootstrap();
-//    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-//"start": "nest start",

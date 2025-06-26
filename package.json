@@ -10,12 +10,13 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
+    "prebuild": "rm -rf dist/",
     "build": "nest build",
-    "postbuild": "echo 'Build completed successfully'",
-    "start": "node dist/main.js",
+    "postbuild": "ls -la dist/ && test -f dist/main.js && echo 'Build completed successfully' || (echo 'ERROR: dist/main.js not found!' && exit 1)",
+    "start": "test -f dist/main.js && node dist/main.js || (echo 'ERROR: dist/main.js not found! Build the project first.' && exit 1)",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main.js",
+    "start:prod": "test -f dist/main.js && node dist/main.js || (echo 'ERROR: dist/main.js not found! Build the project first.' && exit 1)",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

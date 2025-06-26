@@ -6,8 +6,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
   // Enable CORS
+  const allowedOrigins = [
+    'http://localhost:3001', // Local development
+    'http://localhost:3000', // Alternative local port
+    process.env.FRONTEND_URL, // Production frontend URL
+  ].filter(Boolean); // Remove undefined values
+
   app.enableCors({
-    origin: 'http://localhost:3001', // Your frontend URL
+    origin: allowedOrigins.length > 0 ? allowedOrigins : true, // Allow all origins if none specified
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -18,7 +24,10 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true 
   }));
-  await app.listen(process.env.PORT ?? 3000);
+  
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();
 //    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
